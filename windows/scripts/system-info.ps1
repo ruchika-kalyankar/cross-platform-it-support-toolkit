@@ -19,3 +19,10 @@ Write-Host "CPU Usage:"
 $cpu = Get-CimInstance Win32_Processor | Select-Object -ExpandProperty LoadPercentage
 
 Write-Host "$cpu%"
+
+if ($cpu -gt 80) {
+    Write-Host "CPU Status: HIGH"
+}
+else {
+    Write-Host "CPU Status: NORMAL"
+}
