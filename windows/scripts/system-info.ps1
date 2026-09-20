@@ -26,3 +26,20 @@ if ($cpu -gt 80) {
 else {
     Write-Host "CPU Status: NORMAL"
 }
+
+Write-Host ""
+Write-Host "Memory Usage:"
+
+$memory = Get-CimInstance Win32_OperatingSystem
+
+$totalMemory = $memory.TotalVisibleMemorySize
+$freeMemory = $memory.FreePhysicalMemory
+$usedMemory = $totalMemory - $freeMemory
+$memoryUsage = ($usedMemory / $totalMemory) * 100
+Write-Host "$memoryUsage%"
+if ($memoryUsage -gt 80) {
+    Write-Host "Memory Status: HIGH"
+}
+else {
+    Write-Host "Memory Status: NORMAL"
+}
