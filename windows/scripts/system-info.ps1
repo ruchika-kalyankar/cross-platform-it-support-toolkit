@@ -13,17 +13,25 @@ Write-Host "Windows Version: $($computer.WindowsVersion)"
 Write-Host "Manufacturer: $($computer.CsManufacturer)"
 Write-Host "Model: $($computer.CsModel)"
 
+# ========================================
+# CPU Diagnostics
+# ========================================
 Write-Host ""
 Write-Host "CPU Usage:"
 $cpu = Get-CimInstance Win32_Processor | Select-Object -ExpandProperty LoadPercentage
 Write-Host "$cpu%"
 if ($cpu -gt 80) {
-    Write-Host "CPU Status: HIGH"
+    $cpuStatus = "HIGH"
 }
 else {
-    Write-Host "CPU Status: NORMAL"
+    $cpuStatus = "NORMAL"
 }
 
+Write-Host "CPU Status: $cpuStatus"
+
+# ========================================
+# Memory Diagnostics
+# ========================================
 Write-Host ""
 Write-Host "Memory Usage:"
 $memory = Get-CimInstance Win32_OperatingSystem
@@ -33,12 +41,17 @@ $usedMemory = $totalMemory - $freeMemory
 $memoryUsage = ($usedMemory / $totalMemory) * 100
 Write-Host "$memoryUsage%"
 if ($memoryUsage -gt 80) {
-    Write-Host "Memory Status: HIGH"
+    $memoryStatus = "HIGH"
 }
 else {
-    Write-Host "Memory Status: NORMAL"
+    $memoryStatus = "NORMAL"
 }
 
+Write-Host "Memory Status: $memoryStatus"
+
+# ========================================
+# Disk Diagnostics
+# ========================================
 Write-Host ""
 Write-Host "Disk Usage:"
 
@@ -50,15 +63,20 @@ $freeDiskPercentage = ($disk.Free / $totalDisk) * 100
 Write-Host "Free Disk Space: $freeDiskPercentage%"
 
 if ($freeDiskPercentage -lt 10) {
-    Write-Host "Disk Status: CRITICAL"
+    $diskStatus = "CRITICAL"
 }
 elseif ($freeDiskPercentage -lt 20) {
-    Write-Host "Disk Status: WARNING"
+    $diskStatus = "WARNING"
 }
 else {
-    Write-Host "Disk Status: NORMAL"
+    $diskStatus = "NORMAL"
 }
 
+Write-Host "Disk Status: $diskStatus"
+
+# ========================================
+# Network Diagnostics
+# ========================================
 Write-Host ""
 Write-Host "Network Adapter:"
 
@@ -126,10 +144,43 @@ else {
 
 Write-Host ""
 Write-Host "Network Health Summary:"
-
 if ($adapter.Status -eq "Up" -and $gatewayTest -and $internetTest -and $dnsTest) {
-    Write-Host "Network Status: NORMAL"
+    $networkStatus = "NORMAL"
 }
 else {
-    Write-Host "Network Status: CHECK"
+    $networkStatus = "CHECK"
 }
+
+Write-Host "Network Status: $networkStatus"
+# ========================================
+# Overall Diagnostic Summary
+# ========================================
+
+Write-Host ""
+Write-Host "========================================"
+Write-Host " Overall Diagnostic Summary"
+Write-Host "========================================"
+
+Write-Host "CPU: $cpu% - $cpuStatus"
+Write-Host "Memory: $memoryUsage% - $memoryStatus"
+Write-Host "Disk Free: $freeDiskPercentage% - $diskStatus"
+Write-Host "Network: $networkStatus"
+
+Write-Host ""
+
+if ($cpuStatus -eq "HIGH" -or
+    $memoryStatus -eq "HIGH" -or
+    $diskStatus -eq "CRITICAL" -or
+    $networkStatus -eq "CHECK") {
+
+    $overallStatus = "ATTENTION REQUIRED"
+}
+else {
+
+    $overallStatus = "HEALTHY"
+}
+
+Write-Host "Overall Status: $overallStatus"
+
+Write-Host "========================================"
+
