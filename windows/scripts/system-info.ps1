@@ -201,6 +201,37 @@ else {
 }
 
 # ========================================
+# Physical Disk Health Diagnostics
+# ========================================
+
+Write-Host ""
+Write-Host "Physical Disk Health:"
+
+$physicalDisks = Get-Disk
+
+$unhealthyDisks = $physicalDisks |
+    Where-Object HealthStatus -ne "Healthy"
+
+if ($unhealthyDisks) {
+    $diskHealthStatus = "CHECK"
+
+    Write-Host "Disk Health Status: CHECK"
+    Write-Host "One or more physical disks may require attention."
+}
+else {
+    $diskHealthStatus = "NORMAL"
+
+    Write-Host "Disk Health Status: NORMAL"
+    Write-Host "All detected physical disks report Healthy."
+}
+
+
+
+
+
+
+
+# ========================================
 # Overall Diagnostic Summary
 # ========================================
 
@@ -212,6 +243,7 @@ Write-Host "========================================"
 Write-Host "CPU: $cpu% - $cpuStatus"
 Write-Host "Memory: $memoryUsage% - $memoryStatus"
 Write-Host "Disk Free: $freeDiskPercentage% - $diskStatus"
+Write-Host "Disk Health: $diskHealthStatus"
 Write-Host "Network: $networkStatus"
 Write-Host "Windows Update: $updateStatus"
 
@@ -220,6 +252,7 @@ Write-Host ""
 if ($cpuStatus -eq "HIGH" -or
     $memoryStatus -eq "HIGH" -or
     $diskStatus -eq "CRITICAL" -or
+    $diskHealthStatus -eq "CHECK" -or
     $networkStatus -eq "CHECK" -or
     $updateStatus -eq "CHECK") {
 
