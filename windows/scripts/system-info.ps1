@@ -225,6 +225,28 @@ else {
     Write-Host "All detected physical disks report Healthy."
 }
 
+# ========================================
+# Device Health Diagnostics
+# ========================================
+
+Write-Host ""
+Write-Host "Device Health:"
+
+$problemDevices = Get-PnpDevice -PresentOnly |
+    Where-Object Status -ne "OK"
+
+if ($problemDevices) {
+    $deviceStatus = "CHECK"
+
+    Write-Host "Device Status: CHECK"
+    Write-Host "One or more present devices may require attention."
+}
+else {
+    $deviceStatus = "NORMAL"
+
+    Write-Host "Device Status: NORMAL"
+    Write-Host "No present devices report a problem."
+}
 
 
 
@@ -244,6 +266,7 @@ Write-Host "CPU: $cpu% - $cpuStatus"
 Write-Host "Memory: $memoryUsage% - $memoryStatus"
 Write-Host "Disk Free: $freeDiskPercentage% - $diskStatus"
 Write-Host "Disk Health: $diskHealthStatus"
+Write-Host "Device Health: $deviceStatus"
 Write-Host "Network: $networkStatus"
 Write-Host "Windows Update: $updateStatus"
 
@@ -253,6 +276,7 @@ if ($cpuStatus -eq "HIGH" -or
     $memoryStatus -eq "HIGH" -or
     $diskStatus -eq "CRITICAL" -or
     $diskHealthStatus -eq "CHECK" -or
+    $deviceStatus -eq "CHECK" -or
     $networkStatus -eq "CHECK" -or
     $updateStatus -eq "CHECK") {
 
