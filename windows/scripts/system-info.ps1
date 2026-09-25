@@ -152,6 +152,54 @@ else {
 }
 
 Write-Host "Network Status: $networkStatus"
+
+# ========================================
+# Windows Update Service Diagnostics
+# ========================================
+
+Write-Host ""
+Write-Host "Windows Update Services:"
+
+$updateService = Get-Service -Name wuauserv
+$bitsService = Get-Service -Name BITS
+$cryptoService = Get-Service -Name cryptsvc
+
+Write-Host "Windows Update: $($updateService.Status)"
+Write-Host "BITS: $($bitsService.Status)"
+Write-Host "Cryptographic Services: $($cryptoService.Status)"
+
+if ($updateService.Status -eq "Running" -and
+    $bitsService.Status -eq "Running" -and
+    $cryptoService.Status -eq "Running") {
+
+    $updateStatus = "NORMAL"
+}
+else {
+
+    $updateStatus = "CHECK"
+}
+
+Write-Host "Windows Update Status: $updateStatus"
+
+# ========================================
+# Recent Windows Update
+# ========================================
+
+Write-Host ""
+Write-Host "Recent Windows Update:"
+
+$recentUpdate = Get-HotFix |
+    Sort-Object InstalledOn -Descending |
+    Select-Object -First 1
+
+if ($recentUpdate) {
+    Write-Host "Update: $($recentUpdate.HotFixID)"
+    Write-Host "Installed: $($recentUpdate.InstalledOn)"
+}
+else {
+    Write-Host "Update information unavailable"
+}
+
 # ========================================
 # Overall Diagnostic Summary
 # ========================================
@@ -165,13 +213,15 @@ Write-Host "CPU: $cpu% - $cpuStatus"
 Write-Host "Memory: $memoryUsage% - $memoryStatus"
 Write-Host "Disk Free: $freeDiskPercentage% - $diskStatus"
 Write-Host "Network: $networkStatus"
+Write-Host "Windows Update: $updateStatus"
 
 Write-Host ""
 
 if ($cpuStatus -eq "HIGH" -or
     $memoryStatus -eq "HIGH" -or
     $diskStatus -eq "CRITICAL" -or
-    $networkStatus -eq "CHECK") {
+    $networkStatus -eq "CHECK" -or
+    $updateStatus -eq "CHECK") {
 
     $overallStatus = "ATTENTION REQUIRED"
 }
@@ -183,4 +233,3 @@ else {
 Write-Host "Overall Status: $overallStatus"
 
 Write-Host "========================================"
-
