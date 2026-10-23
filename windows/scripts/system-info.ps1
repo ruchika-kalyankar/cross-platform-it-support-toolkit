@@ -290,3 +290,42 @@ else {
 Write-Host "Overall Status: $overallStatus"
 
 Write-Host "========================================"
+
+
+# ========================================
+# Windows Event Log Diagnostics
+# ========================================
+
+Write-Host ""
+Write-Host "========================================"
+Write-Host " Windows Event Log Diagnostics"
+Write-Host "========================================"
+
+$eventLogSummary = Get-WinEvent -FilterHashtable @{
+    LogName = 'System'
+    Level   = 1, 2, 3
+} -MaxEvents 100 -ErrorAction SilentlyContinue
+
+if ($eventLogSummary) {
+
+    $eventCounts = $eventLogSummary |
+        Group-Object LevelDisplayName
+
+    Write-Host "Recent Critical, Error, and Warning Events:"
+    $eventCounts |
+        Sort-Object Name |
+        ForEach-Object {
+            Write-Host "$($_.Name): $($_.Count)"
+        }
+
+    Write-Host ""
+    Write-Host "Most Recent Events:"
+
+    $eventLogSummary |
+        Select-Object -First 5 TimeCreated, Id, LevelDisplayName, ProviderName |
+        Format-Table -AutoSize
+
+}
+else {
+    Write-Host "No matching events found, or the event log could not be read."
+}
